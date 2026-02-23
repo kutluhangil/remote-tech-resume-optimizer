@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .glass-nav {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  
+  .glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  /* Hide scrollbar for clean look */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* Custom thin scrollbar */
+  .thin-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .thin-scrollbar::-webkit-scrollbar-track {
+    background: #F3EFEA;
+  }
+  .thin-scrollbar::-webkit-scrollbar-thumb {
+    background: #D6CEC5;
+    border-radius: 4px;
+  }
+  .thin-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #b36619;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
