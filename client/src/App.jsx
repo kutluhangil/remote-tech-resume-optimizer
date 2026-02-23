@@ -1,4 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -9,15 +11,19 @@ import OptimizerContainer from './pages/OptimizerFlow/OptimizerContainer';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/history" element={<History />} />
-      <Route path="/analyze" element={<OptimizerContainer />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/pricing" element={<Pricing />} />
+
+        {/* Protected Routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+        <Route path="/analyze" element={<ProtectedRoute><OptimizerContainer /></ProtectedRoute>} />
+      </Routes>
+    </AuthProvider>
   );
 }
 

@@ -1,6 +1,37 @@
-import { Link } from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 export default function Register() {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState(null);
+
+    const { login } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        setError(null);
+        try {
+            const response = await fetch('http://localhost:5050/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to register');
+            }
+
+            login({ name: data.name, email: data.email }, data.token);
+            navigate('/dashboard');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
     return (
         <div className="bg-[#F3EFEA] dark:bg-[#211911] min-h-screen flex flex-col items-center justify-start relative font-sans text-[#171411] overflow-x-hidden selection:bg-[#b36619]/20 selection:text-[#b36619]">
             {/* Navigation */}
@@ -30,28 +61,33 @@ export default function Register() {
                             <p className="text-[#877564] dark:text-gray-400 text-base">Join thousands of developers optimizing their remote career.</p>
                         </div>
 
-                        <form className="space-y-5">
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm font-sans text-center">
+                                {error}
+                            </div>
+                        )}
+                        <form onSubmit={handleRegister} className="space-y-5">
                             <div className="space-y-1.5">
                                 <label htmlFor="fullname" className="block text-sm font-medium text-[#171411] dark:text-gray-200 font-serif tracking-wide">Full Name</label>
-                                <input type="text" id="fullname" placeholder="e.g. Alex Morgan" className="w-full rounded-lg border-gray-200 bg-[#FAFAF9] dark:bg-[#2c241b] dark:border-[#3a3a3a] px-4 py-3 text-[#171411] dark:text-gray-100 placeholder-[#877564]/70 focus:border-[#b36619] focus:ring-[#b36619]/20 focus:ring-4 transition-all duration-200 outline-none" />
+                                <input type="text" id="fullname" value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Alex Morgan" className="w-full rounded-lg border-gray-200 bg-[#FAFAF9] dark:bg-[#2c241b] dark:border-[#3a3a3a] px-4 py-3 text-[#171411] dark:text-gray-100 placeholder-[#877564]/70 focus:border-[#b36619] focus:ring-[#b36619]/20 focus:ring-4 transition-all duration-200 outline-none" />
                             </div>
 
                             <div className="space-y-1.5">
                                 <label htmlFor="email" className="block text-sm font-medium text-[#171411] dark:text-gray-200 font-serif tracking-wide">Email Address</label>
-                                <input type="email" id="email" placeholder="name@example.com" className="w-full rounded-lg border-gray-200 bg-[#FAFAF9] dark:bg-[#2c241b] dark:border-[#3a3a3a] px-4 py-3 text-[#171411] dark:text-gray-100 placeholder-[#877564]/70 focus:border-[#b36619] focus:ring-[#b36619]/20 focus:ring-4 transition-all duration-200 outline-none" />
+                                <input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="name@example.com" className="w-full rounded-lg border-gray-200 bg-[#FAFAF9] dark:bg-[#2c241b] dark:border-[#3a3a3a] px-4 py-3 text-[#171411] dark:text-gray-100 placeholder-[#877564]/70 focus:border-[#b36619] focus:ring-[#b36619]/20 focus:ring-4 transition-all duration-200 outline-none" />
                             </div>
 
                             <div className="space-y-1.5">
                                 <label htmlFor="password" className="block text-sm font-medium text-[#171411] dark:text-gray-200 font-serif tracking-wide">Password</label>
                                 <div className="relative">
-                                    <input type="password" id="password" placeholder="••••••••" className="w-full rounded-lg border-gray-200 bg-[#FAFAF9] dark:bg-[#2c241b] dark:border-[#3a3a3a] px-4 py-3 text-[#171411] dark:text-gray-100 placeholder-[#877564]/70 focus:border-[#b36619] focus:ring-[#b36619]/20 focus:ring-4 transition-all duration-200 outline-none" />
+                                    <input type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" className="w-full rounded-lg border-gray-200 bg-[#FAFAF9] dark:bg-[#2c241b] dark:border-[#3a3a3a] px-4 py-3 text-[#171411] dark:text-gray-100 placeholder-[#877564]/70 focus:border-[#b36619] focus:ring-[#b36619]/20 focus:ring-4 transition-all duration-200 outline-none" />
                                     <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-[#877564] hover:text-[#b36619] transition-colors">
                                         <span className="material-symbols-outlined text-[20px]">visibility</span>
                                     </button>
                                 </div>
                             </div>
 
-                            <button type="button" className="w-full bg-[#b36619] hover:bg-[#b36619]/90 text-white font-medium py-3.5 px-4 rounded-lg shadow-sm transition-all duration-300 transform active:scale-[0.98] mt-2 flex items-center justify-center gap-2 group">
+                            <button type="submit" className="w-full bg-[#b36619] hover:bg-[#b36619]/90 text-white font-medium py-3.5 px-4 rounded-lg shadow-sm transition-all duration-300 transform active:scale-[0.98] mt-2 flex items-center justify-center gap-2 group">
                                 <span>Create Account</span>
                                 <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
                             </button>

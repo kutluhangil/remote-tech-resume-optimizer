@@ -1,14 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 export default function History() {
     const [optimizations, setOptimizations] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { token } = useContext(AuthContext);
 
     useEffect(() => {
         const fetchOptimizations = async () => {
             try {
-                const response = await fetch('http://localhost:5050/optimizations');
+                const response = await fetch('http://localhost:5050/optimizations', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const data = await response.json();
                 setOptimizations(data);
             } catch (error) {

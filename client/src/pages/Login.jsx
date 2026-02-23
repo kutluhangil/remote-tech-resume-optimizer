@@ -1,6 +1,35 @@
-import { Link } from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 export default function Login() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState(null);
+    const { login } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setError(null);
+        try {
+            const response = await fetch('http://localhost:5050/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to login');
+            }
+
+            login({ name: data.name, email: data.email }, data.token);
+            navigate('/dashboard');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
     return (
         <div className="bg-[#F3EFEA] text-[#211911] antialiased min-h-screen flex flex-col items-center relative overflow-x-hidden selection:bg-[#b36619]/20 selection:text-[#b36619] font-serif">
             {/* Floating Navigation */}
@@ -33,18 +62,23 @@ export default function Login() {
                     </div>
 
                     {/* Form */}
-                    <form action="#" className="space-y-6 relative z-10">
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm font-sans relative z-10 text-center">
+                            {error}
+                        </div>
+                    )}
+                    <form onSubmit={handleLogin} className="space-y-6 relative z-10">
                         <div className="space-y-2">
                             <label htmlFor="email" className="block font-sans text-sm font-medium text-[#211911] pl-1">Email Address</label>
                             <div className="relative">
-                                <input type="email" id="email" name="email" placeholder="name@example.com" className="block w-full h-14 rounded-xl border-[#d6cec5] bg-[#F3EFEA]/30 text-[#211911] placeholder:text-[#6b5d52]/60 focus:border-[#b36619] focus:ring-[#b36619]/20 focus:ring-4 transition-all duration-200 font-sans px-4 text-base" />
+                                <input type="email" id="email" name="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="name@example.com" className="block w-full h-14 rounded-xl border-[#d6cec5] bg-[#F3EFEA]/30 text-[#211911] placeholder:text-[#6b5d52]/60 focus:border-[#b36619] focus:ring-[#b36619]/20 focus:ring-4 transition-all duration-200 font-sans px-4 text-base" />
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <label htmlFor="password" className="block font-sans text-sm font-medium text-[#211911] pl-1">Password</label>
                             <div className="relative">
-                                <input type="password" id="password" name="password" placeholder="••••••••" className="block w-full h-14 rounded-xl border-[#d6cec5] bg-[#F3EFEA]/30 text-[#211911] placeholder:text-[#6b5d52]/60 focus:border-[#b36619] focus:ring-[#b36619]/20 focus:ring-4 transition-all duration-200 font-sans px-4 text-base" />
+                                <input type="password" id="password" name="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" className="block w-full h-14 rounded-xl border-[#d6cec5] bg-[#F3EFEA]/30 text-[#211911] placeholder:text-[#6b5d52]/60 focus:border-[#b36619] focus:ring-[#b36619]/20 focus:ring-4 transition-all duration-200 font-sans px-4 text-base" />
                             </div>
                         </div>
 
@@ -56,7 +90,7 @@ export default function Login() {
                             <a href="#" className="font-sans text-sm font-medium text-[#b36619] hover:text-[#8f5214] transition-colors">Forgot Password?</a>
                         </div>
 
-                        <button type="button" className="w-full h-14 bg-[#b36619] hover:bg-[#8f5214] text-white font-sans font-medium rounded-xl shadow-lg shadow-[#b36619]/20 hover:shadow-[#b36619]/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 text-lg">
+                        <button type="submit" className="w-full h-14 bg-[#b36619] hover:bg-[#8f5214] text-white font-sans font-medium rounded-xl shadow-lg shadow-[#b36619]/20 hover:shadow-[#b36619]/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 text-lg">
                             Log In
                         </button>
                     </form>
