@@ -1,6 +1,31 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
+    const [optimizations, setOptimizations] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchOptimizations = async () => {
+            try {
+                const response = await fetch('http://localhost:5050/optimizations');
+                const data = await response.json();
+                setOptimizations(data);
+            } catch (error) {
+                console.error("Failed to fetch optimizations:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOptimizations();
+    }, []);
+
+    // Calculate metrics
+    const totalOptimizations = optimizations.length;
+    const latestScore = totalOptimizations > 0 ? optimizations[0].score : 0;
+    const isHighReadiness = latestScore >= 80;
+
     return (
         <div className="bg-[#F3EFEA] dark:bg-[#211911] text-[#171411] dark:text-gray-100 min-h-screen flex flex-col items-center font-serif">
             {/* Floating Navigation */}
@@ -11,7 +36,7 @@ export default function Dashboard() {
                         <span className="text-xl font-bold tracking-tight text-[#171411] dark:text-white">Resume Optimizer</span>
                     </Link>
                     <div className="hidden md:flex items-center gap-8 font-sans">
-                        <Link to="/dashboard" className="text-sm font-medium text-[#171411] hover:text-[#b36619] transition-colors dark:text-gray-200 dark:hover:text-[#b36619]">Dashboard</Link>
+                        <Link to="/dashboard" className="text-sm font-bold text-[#b36619] transition-colors dark:text-[#b36619]">Dashboard</Link>
                         <Link to="/history" className="text-sm font-medium text-[#877564] hover:text-[#b36619] transition-colors dark:text-gray-400 dark:hover:text-[#b36619]">History</Link>
                         <Link to="/pricing" className="text-sm font-medium text-[#877564] hover:text-[#b36619] transition-colors dark:text-gray-400 dark:hover:text-[#b36619]">Pricing</Link>
                     </div>
@@ -40,25 +65,31 @@ export default function Dashboard() {
                         <div className="bg-white dark:bg-[#2c241b] p-8 rounded-2xl shadow-sm border border-white/50 dark:border-white/5 flex flex-col justify-between h-full min-h-[240px] relative overflow-hidden group">
                             <div className="absolute -right-10 -top-10 size-40 bg-[#b36619]/5 rounded-full blur-3xl group-hover:bg-[#b36619]/10 transition-colors"></div>
                             <div className="flex items-start justify-between">
-                                <span className="text-[#877564] dark:text-gray-400 font-medium font-sans text-sm uppercase tracking-wider">Credits Remaining</span>
-                                <span className="material-symbols-outlined text-[#b36619]/40">token</span>
+                                <span className="text-[#877564] dark:text-gray-400 font-medium font-sans text-sm uppercase tracking-wider">Total Optimizations</span>
+                                <span className="material-symbols-outlined text-[#b36619]/40">monitoring</span>
                             </div>
                             <div className="flex flex-col gap-1 mt-4">
-                                <span className="text-7xl font-light text-[#171411] dark:text-white">3</span>
-                                <Link to="/pricing" className="text-[#b36619] hover:text-[#8a4d13] font-medium font-sans text-sm flex items-center gap-1 mt-2 group-hover:translate-x-1 transition-transform">
-                                    Upgrade Plan <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                                <span className="text-7xl font-light text-[#171411] dark:text-white">
+                                    {loading ? "-" : totalOptimizations}
+                                </span>
+                                <Link to="/history" className="text-[#b36619] hover:text-[#8a4d13] font-medium font-sans text-sm flex items-center gap-1 mt-2 group-hover:translate-x-1 transition-transform">
+                                    View History <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                                 </Link>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-[#E8E1D9] dark:bg-[#2c241b] p-5 rounded-xl border border-white/50 dark:border-white/5 flex flex-col gap-3">
-                                <span className="text-[#877564] dark:text-gray-400 text-xs font-bold font-sans uppercase tracking-wider">Avg. Match</span>
-                                <span className="text-3xl font-medium text-[#171411] dark:text-white">78%</span>
+                                <span className="text-[#877564] dark:text-gray-400 text-xs font-bold font-sans uppercase tracking-wider">Latest Score</span>
+                                <span className="text-3xl font-medium text-[#171411] dark:text-white">
+                                    {loading ? "-" : (totalOptimizations > 0 ? `${latestScore}%` : "N/A")}
+                                </span>
                             </div>
                             <div className="bg-[#E8E1D9] dark:bg-[#2c241b] p-5 rounded-xl border border-white/50 dark:border-white/5 flex flex-col gap-3">
                                 <span className="text-[#877564] dark:text-gray-400 text-xs font-bold font-sans uppercase tracking-wider">Readiness</span>
-                                <span className="text-3xl font-medium text-[#171411] dark:text-white">High</span>
+                                <span className="text-3xl font-medium text-[#171411] dark:text-white">
+                                    {loading ? "-" : (totalOptimizations > 0 ? (isHighReadiness ? "High" : "Low") : "N/A")}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -70,27 +101,41 @@ export default function Dashboard() {
                         </div>
 
                         <div className="flex flex-col gap-4">
-                            <div className="group bg-white dark:bg-[#2c241b] p-6 rounded-2xl shadow-sm border border-white/50 dark:border-white/5 hover:shadow-md transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div className="flex-1 flex flex-col gap-1">
-                                    <h4 className="text-xl font-bold text-[#171411] dark:text-white group-hover:text-[#b36619] transition-colors">Senior Frontend Engineer</h4>
-                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                        <span className="px-2 py-0.5 rounded bg-[#E8E1D9] dark:bg-white/10 text-xs text-[#877564] dark:text-gray-300 font-sans">React</span>
-                                        <span className="px-2 py-0.5 rounded bg-[#E8E1D9] dark:bg-white/10 text-xs text-[#877564] dark:text-gray-300 font-sans">Node.js</span>
-                                        <span className="text-xs text-[#877564] dark:text-gray-500 ml-1 font-sans">• Oct 24</span>
-                                    </div>
+                            {loading ? (
+                                <div className="p-6 text-center text-[#877564]">Loading recent optimizations...</div>
+                            ) : optimizations.length === 0 ? (
+                                <div className="p-6 text-center text-[#877564] bg-white dark:bg-[#2c241b] rounded-2xl border border-white/50 dark:border-white/5">
+                                    No optimizations yet. Start your first one!
                                 </div>
-                                <div className="flex items-center gap-6 sm:justify-end">
-                                    <div className="flex flex-col items-end">
-                                        <span className="text-4xl font-light text-[#171411] dark:text-white">82%</span>
-                                        <span className="text-xs text-green-600 font-medium font-sans flex items-center">
-                                            <span className="material-symbols-outlined text-[14px] mr-0.5">trending_up</span> Good Match
-                                        </span>
+                            ) : (
+                                optimizations.slice(0, 3).map((opt) => (
+                                    <div key={opt.id} className="group bg-white dark:bg-[#2c241b] p-6 rounded-2xl shadow-sm border border-white/50 dark:border-white/5 hover:shadow-md transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div className="flex-1 flex flex-col gap-1">
+                                            <h4 className="text-xl font-bold text-[#171411] dark:text-white group-hover:text-[#b36619] transition-colors">Target Role</h4>
+                                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                                {opt.result?.missingKeywords?.slice(0, 2).map((kw, i) => (
+                                                    <span key={i} className="px-2 py-0.5 rounded bg-[#E8E1D9] dark:bg-white/10 text-xs text-[#877564] dark:text-gray-300 font-sans">{kw}</span>
+                                                ))}
+                                                <span className="text-xs text-[#877564] dark:text-gray-500 ml-1 font-sans">
+                                                    • {new Date(opt.createdAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-6 sm:justify-end">
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-4xl font-light text-[#171411] dark:text-white">{opt.score}%</span>
+                                                <span className={`text-xs font-medium font-sans flex items-center ${opt.score >= 80 ? 'text-green-600' : 'text-amber-600'}`}>
+                                                    <span className="material-symbols-outlined text-[14px] mr-0.5">{opt.score >= 80 ? 'trending_up' : 'trending_flat'}</span>
+                                                    {opt.score >= 80 ? 'Good Match' : 'Needs Work'}
+                                                </span>
+                                            </div>
+                                            <Link to={`/history`} className="size-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-[#877564] group-hover:bg-[#b36619] group-hover:text-white group-hover:border-[#b36619] transition-all">
+                                                <span className="material-symbols-outlined">arrow_outward</span>
+                                            </Link>
+                                        </div>
                                     </div>
-                                    <button className="size-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-[#877564] group-hover:bg-[#b36619] group-hover:text-white group-hover:border-[#b36619] transition-all">
-                                        <span className="material-symbols-outlined">arrow_outward</span>
-                                    </button>
-                                </div>
-                            </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>
@@ -112,10 +157,12 @@ export default function Dashboard() {
                             <div>
                                 <h4 className="text-2xl font-serif font-bold text-[#171411] dark:text-white mb-2">AI Analysis Insight</h4>
                                 <p className="text-[#877564] dark:text-gray-400 text-sm leading-relaxed max-w-md font-sans">
-                                    Your resume shows strong technical keywords but lacks soft-skill metrics. Consider adding "Cross-functional collaboration" to improve your score.
+                                    {totalOptimizations > 0
+                                        ? (optimizations[0].result?.suggestions?.[0] || 'Keep optimizing your resume to land your dream role!')
+                                        : 'Start an analysis to get AI powered insights on your resume.'}
                                 </p>
                             </div>
-                            <button className="text-sm font-bold text-[#171411] font-sans dark:text-white underline decoration-[#b36619] decoration-2 underline-offset-4 hover:text-[#b36619] transition-colors">Read Full Report</button>
+                            <Link to="/history" className="text-sm font-bold text-[#171411] font-sans dark:text-white underline decoration-[#b36619] decoration-2 underline-offset-4 hover:text-[#b36619] transition-colors">Read Full Report</Link>
                         </div>
                     </div>
                 </div>

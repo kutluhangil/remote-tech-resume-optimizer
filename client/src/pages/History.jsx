@@ -1,6 +1,26 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function History() {
+    const [optimizations, setOptimizations] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchOptimizations = async () => {
+            try {
+                const response = await fetch('http://localhost:5050/optimizations');
+                const data = await response.json();
+                setOptimizations(data);
+            } catch (error) {
+                console.error("Failed to fetch optimizations:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOptimizations();
+    }, []);
+
     return (
         <div className="bg-[#F3EFEA] dark:bg-[#211911] min-h-screen text-[#171411] font-serif selection:bg-[#b36619]/20">
             <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
@@ -69,35 +89,45 @@ export default function History() {
                         </div>
 
                         <div className="flex flex-col space-y-6">
-                            {[1, 2].map((i) => (
-                                <div key={i} className="group relative flex flex-col gap-6 rounded-2xl bg-[#E8E1D9] p-6 transition-all hover:bg-[#E3DBD3] hover:shadow-md dark:bg-[#2A221A] dark:hover:bg-[#332a21] md:flex-row md:items-center md:justify-between border border-transparent hover:border-[#b36619]/10">
-                                    <div className="flex flex-1 flex-col gap-3">
-                                        <div className="flex items-start justify-between md:justify-start md:gap-4">
-                                            <h3 className="text-2xl font-semibold text-[#171411] dark:text-white group-hover:text-[#b36619] transition-colors font-serif">Senior Frontend Engineer</h3>
-                                        </div>
-                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#877564] dark:text-gray-400 font-sans">
-                                            <span className="flex items-center gap-1">
-                                                <span className="material-symbols-outlined text-[16px]">business</span>
-                                                Remote
-                                            </span>
-                                            <span className="h-1 w-1 rounded-full bg-[#877564]/40"></span>
-                                            <span className="flex items-center gap-1">
-                                                <span className="material-symbols-outlined text-[16px]">calendar_today</span>
-                                                Oct 24, 2023
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between gap-8 border-t border-black/5 pt-4 dark:border-white/5 md:border-t-0 md:pt-0">
-                                        <div className="hidden flex-col items-end md:flex">
-                                            <span className="text-4xl font-bold text-[#171411] dark:text-white">92%</span>
-                                            <span className="text-xs text-[#877564] dark:text-gray-500 font-sans uppercase tracking-wider">ATS Score</span>
-                                        </div>
-                                        <Link to="/analyze" className="group/btn flex items-center justify-center rounded-full bg-white p-3 text-[#171411] shadow-sm transition-all hover:bg-[#b36619] hover:text-white dark:bg-white/10 dark:text-white dark:hover:bg-[#b36619] md:h-12 md:w-12 md:bg-transparent md:shadow-none md:ring-1 md:ring-black/10 md:hover:ring-[#b36619] dark:md:ring-white/20">
-                                            <span className="material-symbols-outlined text-[20px] transition-transform group-hover/btn:translate-x-0.5 md:text-[24px]">arrow_forward</span>
-                                        </Link>
-                                    </div>
+                            {loading ? (
+                                <div className="p-12 text-center text-[#877564]">Loading your optimization history...</div>
+                            ) : optimizations.length === 0 ? (
+                                <div className="p-12 text-center text-[#877564] bg-white dark:bg-[#2c241b] rounded-2xl border border-white/50 dark:border-white/5">
+                                    No past optimizations found. Start a new one!
                                 </div>
-                            ))}
+                            ) : (
+                                optimizations.map((opt) => (
+                                    <div key={opt.id} className="group relative flex flex-col gap-6 rounded-2xl bg-[#E8E1D9] p-6 transition-all hover:bg-[#E3DBD3] hover:shadow-md dark:bg-[#2A221A] dark:hover:bg-[#332a21] md:flex-row md:items-center md:justify-between border border-transparent hover:border-[#b36619]/10">
+                                        <div className="flex flex-1 flex-col gap-3">
+                                            <div className="flex items-start justify-between md:justify-start md:gap-4">
+                                                <h3 className="text-2xl font-semibold text-[#171411] dark:text-white group-hover:text-[#b36619] transition-colors font-serif">
+                                                    Target Role Database Save
+                                                </h3>
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#877564] dark:text-gray-400 font-sans">
+                                                <span className="flex items-center gap-1">
+                                                    <span className="material-symbols-outlined text-[16px]">business</span>
+                                                    Remote
+                                                </span>
+                                                <span className="h-1 w-1 rounded-full bg-[#877564]/40"></span>
+                                                <span className="flex items-center gap-1">
+                                                    <span className="material-symbols-outlined text-[16px]">calendar_today</span>
+                                                    {new Date(opt.createdAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-8 border-t border-black/5 pt-4 dark:border-white/5 md:border-t-0 md:pt-0">
+                                            <div className="hidden flex-col items-end md:flex">
+                                                <span className="text-4xl font-bold text-[#171411] dark:text-white">{opt.score}%</span>
+                                                <span className="text-xs text-[#877564] dark:text-gray-500 font-sans uppercase tracking-wider">ATS Score</span>
+                                            </div>
+                                            <Link to="/analyze" className="group/btn flex items-center justify-center rounded-full bg-white p-3 text-[#171411] shadow-sm transition-all hover:bg-[#b36619] hover:text-white dark:bg-white/10 dark:text-white dark:hover:bg-[#b36619] md:h-12 md:w-12 md:bg-transparent md:shadow-none md:ring-1 md:ring-black/10 md:hover:ring-[#b36619] dark:md:ring-white/20">
+                                                <span className="material-symbols-outlined text-[20px] transition-transform group-hover/btn:translate-x-0.5 md:text-[24px]">arrow_forward</span>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
 
                     </div>
